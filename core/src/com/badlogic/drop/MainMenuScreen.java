@@ -47,10 +47,10 @@ public class MainMenuScreen implements Screen {
         backgroundTexture = new Texture(Gdx.files.internal("tile.png"));
         titleTexture = new Texture(Gdx.files.internal("title.png"));
         startTexture= new Texture(Gdx.files.internal("start.png"));
-        catSheet1 = new Texture(Gdx.files.internal("Texture/cats/orange/t.png"));
-        catSheet2 = new Texture(Gdx.files.internal("Texture/cats/white/t.png"));
-        catSheet3 = new Texture(Gdx.files.internal("Texture/cats/buchi/t.png"));
-        catSheet4 = new Texture(Gdx.files.internal("Texture/cats/brown/t.png"));
+        catSheet1 = new Texture(Gdx.files.internal("Texture/cats/black/t.png"));
+        catSheet2 = new Texture(Gdx.files.internal("Texture/cats/orange/t.png"));
+        catSheet3 = new Texture(Gdx.files.internal("Texture/cats/white/t.png"));
+        catSheet4 = new Texture(Gdx.files.internal("Texture/cats/buchi/t.png"));
 
         // Use the split utility method to create a 2D array of TextureRegions. This is
         // possible because this sprite sheet contains frames of equal size and they are
@@ -158,7 +158,8 @@ public class MainMenuScreen implements Screen {
         cat.batch.end();
 
         if (Gdx.input.isTouched()) {
-            cat.setScreen(new game(cat));
+            cat.setScreen(new GameScreen(cat));
+            //cat.setScreen(new WinnerScreen(cat, 1));
             dispose();
         }
     }
