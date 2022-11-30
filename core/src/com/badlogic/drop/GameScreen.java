@@ -1,14 +1,12 @@
 package com.badlogic.drop;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -16,11 +14,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.TimeUtils;
+import objects.Heart;
+import objects.Player;
 
 
 public class GameScreen implements Screen {
     final Cat cat;
+
+    GameStateManager gsm;
 
     int screenWidth = 800;
     int screenHeight = 630;
@@ -28,11 +29,9 @@ public class GameScreen implements Screen {
     int height = 70;
     int width = 80;
 
-    Texture dropImage;
+    Texture heart;
 
-    Texture tile, wall, window, glowingtile;
-    Texture cat1_l, cat1_r, rightCat1, leftCat1, upCat1, downCat1;
-    Texture cat2_l, cat2_r, rightCat2, leftCat2, upCat2, downCat2;
+    Texture tile, wall, window, glowingtile, player1title, player2title;
     Texture couch, chair_left, chair_right, largeDrawer, smallDrawer, sidetable, lamp, table, tableplant;
     Texture fireball_left, fireball_right, fireball_up, fireball_down;
     float stateTime;
@@ -51,6 +50,8 @@ public class GameScreen implements Screen {
     Array<Rectangle> p1_fireball;
     Array<Rectangle> p2_fireball;
 
+    ArrayList<Heart> p1Lives;
+    ArrayList<Heart> p2Lives;
 
 
     long lastDropTime;
@@ -73,11 +74,25 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 800, 630);
 
 
-        cat1 = new Player(1, cat1_l, cat1_r, rightCat1, leftCat1, upCat1, downCat1, stateTime);
-        cat2 = new Player(2, cat2_l, cat2_r, rightCat2, leftCat2, upCat2, downCat2, stateTime);
+        cat1 = new Player(1, stateTime);
+        cat2 = new Player(2, stateTime);
+        player1 = cat1.getRec();
+        player2 = cat2.getRec();
+
 
         p1_fireball = new Array<>();
         p2_fireball = new Array<>();
+        p1Lives = new ArrayList<>();
+        p2Lives = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            Heart h1 = new Heart();
+            Heart h2 = new Heart();
+            h1.setLocation(120 + i * 55, 8);
+            h2.setLocation(600 + i * 55, 8);
+            p1Lives.add(h1);
+            p2Lives.add(h2);
+        }
 
 
     }
@@ -101,23 +116,14 @@ public class GameScreen implements Screen {
 
     }
 
+
+
     private void loadTextures() {
-        cat1_r = new Texture(Gdx.files.internal("Texture/cats/orange/idle_r.png"));
-        cat1_l = new Texture(Gdx.files.internal("Texture/cats/orange/idle_l.png"));
-        cat2_r = new Texture(Gdx.files.internal("Texture/cats/gray/idle_r.png"));
-        cat2_l = new Texture(Gdx.files.internal("Texture/cats/gray/idle_l.png"));
+
         wall = new Texture(Gdx.files.internal("Texture/furniture/floor/wall.png"));
         glowingtile = new Texture(Gdx.files.internal("Texture/furniture/floor/windowshade.png"));
         tile = new Texture(Gdx.files.internal("Texture/furniture/floor/b_title.png"));
         window = new Texture(Gdx.files.internal("Texture/furniture/floor/window.png"));
-        leftCat1 = new Texture(Gdx.files.internal("Texture/cats/orange/left.png"));
-        rightCat1 = new Texture(Gdx.files.internal("Texture/cats/orange/right.png"));
-        downCat1 = new Texture(Gdx.files.internal("Texture/cats/orange/front.png"));
-        upCat1 = new Texture(Gdx.files.internal("Texture/cats/orange/back.png"));
-        leftCat2 = new Texture(Gdx.files.internal("Texture/cats/gray/left.png"));
-        rightCat2 = new Texture(Gdx.files.internal("Texture/cats/gray/right.png"));
-        downCat2 = new Texture(Gdx.files.internal("Texture/cats/gray/front.png"));
-        upCat2 = new Texture(Gdx.files.internal("Texture/cats/gray/back.png"));
         couch = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/Couch.png"));
         chair_left = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/chair_left.png"));
         chair_right = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/chair_right.png"));
@@ -132,8 +138,8 @@ public class GameScreen implements Screen {
         fireball_up = new Texture(Gdx.files.internal("Texture/attack/attack_U.png"));
         fireball_down = new Texture(Gdx.files.internal("Texture/attack/attack_D.png"));
 
-
-
+        player1title = new Texture("Texture/buttons/p1.png");
+        player2title = new Texture("Texture/buttons/p2.png");
     }
     @Override
     public void render(float delta) {
@@ -143,17 +149,14 @@ public class GameScreen implements Screen {
         cat.batch.setProjectionMatrix(camera.combined);
         setBoundaries(cat1);
         setBoundaries(cat2);
+        playerCrash();
 
-        player1 = cat1.getRectngle();
-        player2 = cat2.getRectngle();
-        cat1.motionChange();
-        cat2.motionChange();
+
+        cat1.update(stateTime);
+        cat2.update(stateTime);
 
 
         cat.batch.begin();
-
-        attack(cat1);
-        attack(cat2);
 
         drawBackground();
         stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
@@ -163,6 +166,19 @@ public class GameScreen implements Screen {
         putFurnitures();
         cat.batch.draw(cat1.getCurrentFrame(), player1.x, player1.y, player1.getWidth(), player1.getHeight());
         cat.batch.draw(cat2.getCurrentFrame(), player2.x, player2.y, player2.getWidth(), player2.getHeight());
+        cat.batch.draw(player1title, 0,28, 0.18f*678, 0.18f*209);
+        cat.batch.draw(player2title, 500,28, 0.18f*678, 0.18f*209);
+
+        for (int i = 0; i < p1Lives.size(); i++) {
+            Heart h = p1Lives.get(i);
+           cat.batch.draw(h.getImg(), h.getX(), h.getY(), h.getWidth(), h.getHeight());
+
+        }
+
+        for (int i = 0; i < p2Lives.size(); i++) {
+            Heart h = p2Lives.get(i);
+            cat.batch.draw(h.getImg(), h.getX(), h.getY(), h.getWidth(), h.getHeight());
+        }
 
         cat.batch.end();
 
@@ -170,7 +186,9 @@ public class GameScreen implements Screen {
             //touched(player1, x);
             //touched(player2, x);
         }
-
+        if(player1.overlaps(player2) && p1Lives.size() > 0 ){
+            p1Lives.remove(p1Lives.size()-1);
+        }
 /*
 
         if (Gdx.input.isKeyPressed(Keys.LEFT))
@@ -207,7 +225,7 @@ public class GameScreen implements Screen {
 
     public void makeFurniture(Texture texture, int x, int y, int w, int h){
         Rectangle furniture = new Rectangle( x, y, w * width, h * height);
-        cat.batch.setBlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
+        //cat.batch.setBlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
         cat.batch.draw(texture, furniture.x, furniture.y, furniture.width, furniture.height);
         unbreakable.add(furniture);
     }
@@ -229,9 +247,9 @@ public class GameScreen implements Screen {
     }
 
     public void setBoundaries(Player cat){
-        Rectangle player = cat.getRectngle();
+        Rectangle player = cat.getRec();
 
-        //left
+
         if ( player.x < 0 ) {
             player.x = 0;
         }
@@ -253,6 +271,9 @@ public class GameScreen implements Screen {
 
         Rectangle intersection = new Rectangle();
         //furnitures
+
+
+
         for(Rectangle furniture: unbreakable){
             Intersector.intersectRectangles(player, furniture, intersection);
 
@@ -273,7 +294,37 @@ public class GameScreen implements Screen {
         }
     }
 
-    public void attack(Player player){
+    public void playerCrash() {
+        collisionAvoidance(player2, player1);
+        collisionAvoidance(player1, player2);
+
+
+    }
+
+    public void collisionAvoidance(Rectangle one, Rectangle two){
+        if(one.overlaps(two)){
+            Rectangle intersection = new Rectangle();
+            Intersector.intersectRectangles(one, two, intersection);
+
+            if(one.overlaps(two)){
+                float playerCenterX = (one.x + one.width * 0.5f);
+                float playerCenterY = (one.y + one.height * 0.5f);
+                float interCenterX = (intersection.x + intersection.width * 0.5f);
+                float interCenterY = (intersection.y + intersection.height * 0.5f);
+                float intersectVecX = playerCenterX - interCenterX;
+                float intersectVecY = playerCenterY - interCenterY;
+                if (Math.abs(intersectVecX) > Math.abs(intersectVecY)) {
+                    one.x += ((intersectVecX > 0) ? 1 : -1) * intersection.width/10;
+                    two.x -= ((intersectVecX > 0) ? 1 : -1) ;
+                } else {
+                    one.y += ((intersectVecY > 0) ? 1 : -1) * intersection.height/10;
+                    two.y -= ((intersectVecY > 0) ? 1 : -1) ;
+                }
+            }
+        }
+    }
+
+/*    public void attack(Player player){
         if(Gdx.input.isKeyPressed(player.shoot)){
             System.out.println("Pressed");
             Rectangle p = player.getRectngle();
@@ -339,7 +390,7 @@ public class GameScreen implements Screen {
             }
 
         }
-    }
+    }*/
 
 
     @Override
@@ -370,7 +421,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        dropImage.dispose();
         dropSound.dispose();
         rainMusic.dispose();
         tile.dispose();

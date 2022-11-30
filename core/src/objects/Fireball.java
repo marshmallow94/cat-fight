@@ -1,4 +1,4 @@
-package com.badlogic.drop;
+package objects;
 
 import com.badlogic.gdx.graphics.Texture;
 

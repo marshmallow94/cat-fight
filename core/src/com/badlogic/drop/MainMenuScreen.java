@@ -48,7 +48,7 @@ public class MainMenuScreen implements Screen {
         titleTexture = new Texture(Gdx.files.internal("title.png"));
         startTexture= new Texture(Gdx.files.internal("start.png"));
         catSheet1 = new Texture(Gdx.files.internal("Texture/cats/black/t.png"));
-        catSheet2 = new Texture(Gdx.files.internal("Texture/cats/orange/t.png"));
+        catSheet2 = new Texture(Gdx.files.internal("Texture/cats/orange/lt.png"));
         catSheet3 = new Texture(Gdx.files.internal("Texture/cats/white/t.png"));
         catSheet4 = new Texture(Gdx.files.internal("Texture/cats/buchi/t.png"));
 
