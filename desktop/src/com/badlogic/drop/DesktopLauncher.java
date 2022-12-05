@@ -9,7 +9,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("Cat Fight");
-		config.setWindowedMode(800,630);
+		config.setWindowedMode(960,560);
 		config.useVsync(true);
 		new Lwjgl3Application(new Cat(), config);
 	}

@@ -26,12 +26,7 @@ public class Player extends GameObject {
     private int acceleration;
 
     int keyup, keydown, keyleft, keyright, keyshoot;
-    Texture[] black;
-    Texture[] buchi;
-    Texture[] white;
-    Texture[] brown;
-    Texture[] orange;
-    Texture[] gray;
+    Texture[] imgs;
 
     TextureRegion currentFrame;
     TextureRegion idleleft, idleright, goleft, goright, goup, godown, shootright, shootleft, sleep;
@@ -39,16 +34,13 @@ public class Player extends GameObject {
 
     float stateTime;
 
+    float specialEffect = 0;
+
     private int playerNum;
     Rectangle rec;
     public Player(int playerNum, float stateTime) {
         this.playerNum = playerNum;
-        black = new Texture[9];
-        buchi  = new Texture[9];
-        white = new Texture[9];
-        brown = new Texture[9];
-        orange = new Texture[9];
-        gray = new Texture[9];
+        imgs = new Texture[9];
         this.stateTime = stateTime;
         loadTexture();
         setupFrame(stateTime);
@@ -68,11 +60,11 @@ public class Player extends GameObject {
             keyleft = Input.Keys.LEFT;
             keyright = Input.Keys.RIGHT;
             keyshoot = Input.Keys.SPACE;
-            this.x = 735;
+            this.x = 1280 - 65;
             left = true;
         }
 
-        this.y = 210;
+        this.y = 490;
         setWidth(65);
         setHeight(65);
         this.acceleration = 200;
@@ -84,36 +76,75 @@ public class Player extends GameObject {
 
     public void loadTexture(){
         //orange
-        orange[LIDLE] = new Texture(Gdx.files.internal("Texture/cats/orange/idle_l.png"));
-        orange[RIDLE] = new Texture(Gdx.files.internal("Texture/cats/orange/idle_r.png"));
-        orange[LEFT] = new Texture(Gdx.files.internal("Texture/cats/orange/left.png"));
-        orange[RIGHT] = new Texture(Gdx.files.internal("Texture/cats/orange/right.png"));
-        orange[DOWN] = new Texture(Gdx.files.internal("Texture/cats/orange/front.png"));
-        orange[UP] = new Texture(Gdx.files.internal("Texture/cats/orange/back.png"));
-        orange[LT] = new Texture(Gdx.files.internal("Texture/cats/orange/lt.png"));
-        orange[RT] = new Texture(Gdx.files.internal("Texture/cats/orange/rt.png"));
-        orange[ZZZ] = new Texture(Gdx.files.internal("Texture/cats/orange/sleep.png"));
+        if (playerNum == 1) {
+            imgs[LIDLE] = new Texture(Gdx.files.internal("Texture/cats/orange/idle_l.png"));
+            imgs[RIDLE] = new Texture(Gdx.files.internal("Texture/cats/orange/idle_r.png"));
+            imgs[LEFT] = new Texture(Gdx.files.internal("Texture/cats/orange/left.png"));
+            imgs[RIGHT] = new Texture(Gdx.files.internal("Texture/cats/orange/right.png"));
+            imgs[DOWN] = new Texture(Gdx.files.internal("Texture/cats/orange/front.png"));
+            imgs[UP] = new Texture(Gdx.files.internal("Texture/cats/orange/back.png"));
+            imgs[LT] = new Texture(Gdx.files.internal("Texture/cats/orange/lt.png"));
+            imgs[RT] = new Texture(Gdx.files.internal("Texture/cats/orange/rt.png"));
+            imgs[ZZZ] = new Texture(Gdx.files.internal("Texture/cats/orange/sleep.png"));
+        } else {
+            //gray
+            imgs[LIDLE] = new Texture(Gdx.files.internal("Texture/cats/gray/idle_l.png"));
+            imgs[RIDLE] = new Texture(Gdx.files.internal("Texture/cats/gray/idle_r.png"));
+            imgs[LEFT] = new Texture(Gdx.files.internal("Texture/cats/gray/left.png"));
+            imgs[RIGHT] = new Texture(Gdx.files.internal("Texture/cats/gray/right.png"));
+            imgs[DOWN] = new Texture(Gdx.files.internal("Texture/cats/gray/front.png"));
+            imgs[UP] = new Texture(Gdx.files.internal("Texture/cats/gray/back.png"));
+            imgs[LT] = new Texture(Gdx.files.internal("Texture/cats/gray/lt.png"));
+            imgs[RT] = new Texture(Gdx.files.internal("Texture/cats/gray/rt.png"));
+            imgs[ZZZ] = new Texture(Gdx.files.internal("Texture/cats/gray/sleep.png"));
+        }
+    }
 
-        //gray
-        gray[LIDLE]= new Texture(Gdx.files.internal("Texture/cats/gray/idle_l.png"));
-        gray[RIDLE] = new Texture(Gdx.files.internal("Texture/cats/gray/idle_r.png"));
-        gray[LEFT] = new Texture(Gdx.files.internal("Texture/cats/gray/left.png"));
-        gray[RIGHT] = new Texture(Gdx.files.internal("Texture/cats/gray/right.png"));
-        gray[DOWN] = new Texture(Gdx.files.internal("Texture/cats/gray/front.png"));
-        gray[UP] = new Texture(Gdx.files.internal("Texture/cats/gray/back.png"));
-        gray[LT] = new Texture(Gdx.files.internal("Texture/cats/gray/lt.png"));
-        gray[RT] = new Texture(Gdx.files.internal("Texture/cats/gray/rt.png"));
-        gray[ZZZ] = new Texture(Gdx.files.internal("Texture/cats/gray/sleep.png"));
+    public void setSpecialEffect(float time) {
+        this.specialEffect = time;
+    }
 
+    public void resetEffect() {
+        this.acceleration = 200;
+        this.specialEffect = 0;
+    }
+
+    public float getSpecialEffect() {
+        return specialEffect;
     }
 
     public Rectangle getRec() {
         return rec;
     }
 
+    public int getPlayerNum() {
+        return playerNum;
+    }
+
+    public void setAcceleration(int speed) {
+        this.acceleration = speed;
+
+    }
+
     public void update(float stateTime){
         setupFrame(stateTime);
-        if (Gdx.input.isKeyPressed(keyleft)) {
+
+        if (Gdx.input.isKeyPressed(keyshoot)) {
+            //stop all the commands
+            Animation a;
+            if (left) {
+                currentFrame = shootright;
+            } else if (right) {
+                currentFrame = shootleft;
+            } else if (up) {
+                a =  animation(imgs[UP], 1, 4, 0.5f);
+                currentFrame = (TextureRegion) a.getKeyFrame(0, true);
+            }else if (down) {
+                a =  animation(imgs[DOWN], 1, 4, 100f);
+                currentFrame = (TextureRegion) a.getKeyFrame(0, true);
+            }
+            lastTouched = 0;
+        } else if (Gdx.input.isKeyPressed(keyleft)) {
             rec.x -= acceleration * Gdx.graphics.getDeltaTime();
             currentFrame = goleft;
             up = false;
@@ -122,7 +153,7 @@ public class Player extends GameObject {
             left = true;
             lastTouched = 0;
         }
-        if (Gdx.input.isKeyPressed(keyright)) {
+        else if (Gdx.input.isKeyPressed(keyright)) {
             rec.x += acceleration * Gdx.graphics.getDeltaTime();
             currentFrame = goright;
             up = false;
@@ -131,7 +162,7 @@ public class Player extends GameObject {
             left = false;
             lastTouched = 0;
         }
-        if (Gdx.input.isKeyPressed(keydown)) {
+        else if (Gdx.input.isKeyPressed(keydown)) {
             rec.y -= acceleration * Gdx.graphics.getDeltaTime();
             currentFrame = godown;
             up = false;
@@ -140,7 +171,7 @@ public class Player extends GameObject {
             left = false;
             lastTouched = 0;
         }
-        if (Gdx.input.isKeyPressed(keyup)) {
+        else if (Gdx.input.isKeyPressed(keyup)) {
             rec.y += acceleration * Gdx.graphics.getDeltaTime();
             currentFrame = goup;
             up = true;
@@ -149,8 +180,9 @@ public class Player extends GameObject {
             left = false;
             lastTouched = 0;
         }
-        if (!Gdx.input.isKeyPressed(keyup) && !Gdx.input.isKeyPressed(keydown)
-                && !Gdx.input.isKeyPressed(keyleft) && !Gdx.input.isKeyPressed(keyright)  ){
+        else if (!Gdx.input.isKeyPressed(keyup) && !Gdx.input.isKeyPressed(keydown)
+                && !Gdx.input.isKeyPressed(keyleft) && !Gdx.input.isKeyPressed(keyright)
+                && !Gdx.input.isKeyPressed(keyshoot)){
             if (right){
                 currentFrame = idleright;
             } else {
@@ -158,17 +190,8 @@ public class Player extends GameObject {
             }
             lastTouched += stateTime;
         }
-        if (Gdx.input.isKeyPressed(keyshoot)) {
-            //stop all the commands
 
-            if (left) {
-                currentFrame = shootleft;
-            } else if (right) {
-                currentFrame = shootright;
-            }
-            lastTouched = 0;
-        }
-        if (lastTouched/1000 > 4){
+        if (lastTouched/1000 > 6){
             currentFrame = sleep;
         }
     }
@@ -178,7 +201,12 @@ public class Player extends GameObject {
     }
 
 
-    public TextureRegion anime(Texture sheet, int row, int col, float stateTime){
+    public TextureRegion anime(Texture sheet, int row, int col, float stateTime, float duration){
+        Animation obj = animation(sheet, row, col, duration);
+        return (TextureRegion) obj.getKeyFrame(stateTime, true);
+    }
+
+    public Animation animation(Texture sheet, int row, int col, float duration) {
         TextureRegion[][] tmp = TextureRegion.split(sheet,
                 sheet.getWidth() / col,
                 sheet.getHeight() / row);
@@ -189,20 +217,19 @@ public class Player extends GameObject {
                 frame[index++] = tmp[i][j];
             }
         }
-        Animation obj = new Animation<TextureRegion>(0.2f, frame);
-        return (TextureRegion) obj.getKeyFrame(stateTime, true);
+        return new Animation<TextureRegion>(duration, frame);
     }
 
     public void setupFrame(float stateTime) {
-        Texture[] color = (playerNum == 1) ? orange : gray;
-        idleleft = anime(color[LIDLE], 1, 2, stateTime);
-        idleright = anime(color[RIDLE], 1, 2, stateTime);
-        goleft = anime(color[LEFT], 1, 6, stateTime);
-        goright = anime(color[RIGHT], 1, 6, stateTime);
-        godown = anime(color[DOWN] , 1, 4, stateTime);
-        goup = anime(color[UP],  1, 4, stateTime);
-        shootright = anime(color[LT], 1, 2, stateTime);
-        shootleft = anime(color[RT] , 1, 2, stateTime);;
-        sleep = anime(color[ZZZ] , 1, 4, stateTime);
+
+        idleleft = anime(imgs[LIDLE], 1, 2, stateTime, 0.5f);
+        idleright = anime(imgs[RIDLE], 1, 2, stateTime, 0.5f);
+        goleft = anime(imgs[LEFT], 1, 6, stateTime, 0.2f);
+        goright = anime(imgs[RIGHT], 1, 6, stateTime,0.2f);
+        godown = anime(imgs[DOWN] , 1, 4, stateTime, 0.2f);
+        goup = anime(imgs[UP],  1, 4, stateTime, 0.2f);
+        shootright = anime(imgs[LT], 1, 2, stateTime, 0.4f);
+        shootleft = anime(imgs[RT] , 1, 2, stateTime, 0.4f);;
+        sleep = anime(imgs[ZZZ] , 1, 4, stateTime, 0.5f);
     }
 }

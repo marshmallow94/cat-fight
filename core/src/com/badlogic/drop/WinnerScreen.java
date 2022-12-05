@@ -2,6 +2,7 @@ package com.badlogic.drop;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -11,6 +12,8 @@ import com.badlogic.gdx.utils.ScreenUtils;
 public class WinnerScreen implements Screen {
 
     final Cat cat;
+    Music bgm;
+
     int playerNum;
     OrthographicCamera camera;
     float stateTime;
@@ -27,14 +30,16 @@ public class WinnerScreen implements Screen {
         stateTime = 0f;
         this.cat = game;
         this.playerNum = playerNum;
+        bgm = Gdx.audio.newMusic(Gdx.files.internal("Audio/victory.mp3"));
+        bgm.setLooping(false);
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 630);
+        camera.setToOrtho(false, 960, 630);
         loadTexture();
     }
 
     @Override
     public void show() {
-
+        bgm.play();
     }
 
     public void loadTexture(){
@@ -65,11 +70,11 @@ public class WinnerScreen implements Screen {
         cat.batch.draw(currentFrameWinner, 400 - (497*0.75f)/2, 420f, 497*0.75f, 123 * 0.75f);
         cat.batch.draw(currentFramePlayer, 400 - 482/2, 315 - 123/2, 482, 123);
         cat.batch.draw(getCurrentFrameRestart, 400, 70, 1751/5, 98/5);
-        cat.batch.end();/*
+        cat.batch.end();
         if (Gdx.input.isTouched()) {
-            cat.setScreen(new game(cat));
+            cat.setScreen(new GameScreen(cat));
             dispose();
-        }*/
+        }
 
     }
 
