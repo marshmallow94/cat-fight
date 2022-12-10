@@ -9,4 +9,11 @@ public class DryFood extends PowerUpItem {
 
         this.texture = new Texture(Gdx.files.internal("Texture/furniture/powerup/speedUp.png"));
     }
+
+    @Override
+    public void effect(Player player) {
+        super.effect(player);
+        player.setAcceleration(600);
+        player.setSpecialEffect(timePassed);
+    }
 }

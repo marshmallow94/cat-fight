@@ -60,6 +60,8 @@ public class WinnerScreen implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 0);
         camera.update();
+        cat.batch.setProjectionMatrix(camera.combined);
+        Gdx.gl.glViewport( 0,0,960*2,630*2);
 
         cat.batch.begin();
         stateTime += Gdx.graphics.getDeltaTime();
@@ -67,9 +69,9 @@ public class WinnerScreen implements Screen {
         currentFramePlayer = anime(player, 1, 2);
         getCurrentFrameRestart = anime(restart, 1, 2);
         currentFrameWinner = anime(winner, 1, 2);
-        cat.batch.draw(currentFrameWinner, 400 - (497*0.75f)/2, 420f, 497*0.75f, 123 * 0.75f);
-        cat.batch.draw(currentFramePlayer, 400 - 482/2, 315 - 123/2, 482, 123);
-        cat.batch.draw(getCurrentFrameRestart, 400, 70, 1751/5, 98/5);
+        cat.batch.draw(currentFrameWinner, 100, 300, 497, 123);
+        cat.batch.draw(currentFramePlayer, 200, 150, 482*1.5f, 123*1.5f);
+        cat.batch.draw(getCurrentFrameRestart, 300, 70, 1751/4, 98/4);
         cat.batch.end();
         if (Gdx.input.isTouched()) {
             cat.setScreen(new GameScreen(cat));

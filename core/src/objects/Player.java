@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
+import java.util.ArrayList;
+
 
 public class Player extends GameObject {
     private final int LIDLE = 0;
@@ -19,10 +21,12 @@ public class Player extends GameObject {
     private final int LT = 6;
     private final int RT = 7;
     private final int ZZZ = 8;
+
     private boolean left;
     private boolean right;
     private boolean up;
     private boolean down;
+
     private int acceleration;
 
     int keyup, keydown, keyleft, keyright, keyshoot;
@@ -37,13 +41,22 @@ public class Player extends GameObject {
     float specialEffect = 0;
 
     private int playerNum;
+
+    private int numLives;
+    private boolean invinsible;
+
     Rectangle rec;
+    float fireballCharge = 0.0f;
+
     public Player(int playerNum, float stateTime) {
         this.playerNum = playerNum;
         imgs = new Texture[9];
         this.stateTime = stateTime;
         loadTexture();
         setupFrame(stateTime);
+        numLives = 3;
+        invinsible = false;
+
 
         if(playerNum == 1){ //setting player 1 keys & location
             keyup = Input.Keys.W;
@@ -72,6 +85,14 @@ public class Player extends GameObject {
         wrap();
         lastTouched = 0;
 
+    }
+
+    public int getNumLives() {
+        return numLives;
+    }
+
+    public void extraLives() {
+        numLives++;
     }
 
     public void loadTexture(){
@@ -107,6 +128,8 @@ public class Player extends GameObject {
     public void resetEffect() {
         this.acceleration = 200;
         this.specialEffect = 0;
+        this.invinsible = false;
+        System.out.println("reset");
     }
 
     public float getSpecialEffect() {
@@ -121,12 +144,31 @@ public class Player extends GameObject {
         return playerNum;
     }
 
-    public void setAcceleration(int speed) {
-        this.acceleration = speed;
-
+    public boolean isInvinsible() {
+        return invinsible;
     }
 
-    public void update(float stateTime){
+    public void InvinsibleOn() {
+        invinsible = true;
+    }
+
+
+    public void setAcceleration(int speed) {
+        this.acceleration = speed;
+    }
+
+    public boolean tryFire() {
+        if (fireballCharge >= 0.8f) {
+            fireballCharge -= 0.8f;
+            return true;
+        }
+        return false;
+    }
+
+    public void update(float stateTime) {
+        fireballCharge += Gdx.graphics.getDeltaTime();
+        if (fireballCharge > 1.0f) { fireballCharge = 1.0f; }
+
         setupFrame(stateTime);
 
         if (Gdx.input.isKeyPressed(keyshoot)) {
@@ -143,7 +185,6 @@ public class Player extends GameObject {
                 a =  animation(imgs[DOWN], 1, 4, 100f);
                 currentFrame = (TextureRegion) a.getKeyFrame(0, true);
             }
-            lastTouched = 0;
         } else if (Gdx.input.isKeyPressed(keyleft)) {
             rec.x -= acceleration * Gdx.graphics.getDeltaTime();
             currentFrame = goleft;
@@ -183,6 +224,7 @@ public class Player extends GameObject {
         else if (!Gdx.input.isKeyPressed(keyup) && !Gdx.input.isKeyPressed(keydown)
                 && !Gdx.input.isKeyPressed(keyleft) && !Gdx.input.isKeyPressed(keyright)
                 && !Gdx.input.isKeyPressed(keyshoot)){
+
             if (right){
                 currentFrame = idleright;
             } else {
@@ -191,7 +233,7 @@ public class Player extends GameObject {
             lastTouched += stateTime;
         }
 
-        if (lastTouched/1000 > 6){
+        if (lastTouched/1000 > 10){
             currentFrame = sleep;
         }
     }
@@ -231,5 +273,36 @@ public class Player extends GameObject {
         shootright = anime(imgs[LT], 1, 2, stateTime, 0.4f);
         shootleft = anime(imgs[RT] , 1, 2, stateTime, 0.4f);;
         sleep = anime(imgs[ZZZ] , 1, 4, stateTime, 0.5f);
+    }
+    public boolean isLeft() {
+        return left;
+    }
+
+    public void setLeft(boolean left) {
+        this.left = left;
+    }
+
+    public boolean isRight() {
+        return right;
+    }
+
+    public void setRight(boolean right) {
+        this.right = right;
+    }
+
+    public boolean isUp() {
+        return up;
+    }
+
+    public void setUp(boolean up) {
+        this.up = up;
+    }
+
+    public boolean isDown() {
+        return down;
+    }
+
+    public void setDown(boolean down) {
+        this.down = down;
     }
 }

@@ -40,17 +40,17 @@ public class MainMenuScreen implements Screen {
         this.cat = game;
         loadTextures();
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 630);
+        camera.setToOrtho(false, 960, 630);
     }
 
     private void loadTextures() {
-        backgroundTexture = new Texture(Gdx.files.internal("tile.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("Texture/furniture/floor/b_title.png"));
         titleTexture = new Texture(Gdx.files.internal("title.png"));
         startTexture= new Texture(Gdx.files.internal("start.png"));
-        catSheet1 = new Texture(Gdx.files.internal("Texture/cats/black/t.png"));
-        catSheet2 = new Texture(Gdx.files.internal("Texture/cats/orange/lt.png"));
-        catSheet3 = new Texture(Gdx.files.internal("Texture/cats/white/t.png"));
-        catSheet4 = new Texture(Gdx.files.internal("Texture/cats/buchi/t.png"));
+        catSheet1 = new Texture(Gdx.files.internal("Texture/cats/gray/lt.png"));
+        catSheet2 = new Texture(Gdx.files.internal("Texture/cats/orange/rt.png"));
+        catSheet3 = new Texture(Gdx.files.internal("Texture/cats/white/rt.png"));
+        catSheet4 = new Texture(Gdx.files.internal("Texture/cats/buchi/lt.png"));
 
         // Use the split utility method to create a 2D array of TextureRegions. This is
         // possible because this sprite sheet contains frames of equal size and they are
@@ -104,7 +104,7 @@ public class MainMenuScreen implements Screen {
 
         // Initialize the Animation with the frame interval and array of frames
         catAnimation1 = new Animation<TextureRegion>(0.06f, catFrames);
-        catAnimation2 = new Animation<TextureRegion>(0.045f, catFrames2);
+        catAnimation2 = new Animation<TextureRegion>(0.08f, catFrames2);
         catAnimation3 = new Animation<TextureRegion>(0.07f, catFrames3);
         catAnimation4 = new Animation<TextureRegion>(0.05f, catFrames4);
 
@@ -127,8 +127,8 @@ public class MainMenuScreen implements Screen {
 
 
         cat.batch.begin();
-        for(int i = 0; i < 9; i++){
-            for(int j = 0; j < 10; j++) {
+        for(int i = 0; i < 10; i++){
+            for(int j = 0; j < 12; j++) {
                 cat.batch.draw(backgroundTexture, j * 80, i * 70, 80, 70);
             }
         }
@@ -139,27 +139,24 @@ public class MainMenuScreen implements Screen {
 
         // Get current frame of animation for the current stateTime
         TextureRegion currentFrame = catAnimation1.getKeyFrame(stateTime, true);
-        cat.batch.draw(currentFrame, 50, 50, 250, 250); // Draw current frame at (50, 50)
+        cat.batch.draw(currentFrame, 320 - 60, 70, 120, 120); // Draw current frame at (50, 50)
 
         TextureRegion currentFrame2 = catAnimation2.getKeyFrame(stateTime, true);
-        cat.batch.draw(currentFrame2, 250, 50, 250, 250); // Draw current frame at (50, 50)
+        cat.batch.draw(currentFrame2, 640 - 60, 70, 120, 120); // Draw current frame at (50, 50)
 
         TextureRegion currentFrame3 = catAnimation3.getKeyFrame(stateTime, true);
-        cat.batch.draw(currentFrame3, 450, 50, 250, 250); // Draw current frame at (50, 50)
+        cat.batch.draw(currentFrame3,160 - 60, 70, 120, 120); // Draw current frame at (50, 50)
 
         TextureRegion currentFrame4 = catAnimation4.getKeyFrame(stateTime, true);
-        cat.batch.draw(currentFrame4, 500, 50, 250, 250); // Draw current frame at (50, 50)
+        cat.batch.draw(currentFrame4, 800 - 60, 70, 120, 120); // Draw current frame at (50, 50)
 
-        cat.batch.draw(titleTexture, 200, 300, 400, 100);
-        cat.batch.draw(startTexture, 300, 200, 200, 100);
+        cat.batch.draw(titleTexture, (960- 400*1.5f)/2, 400f, 400*1.5f, 100*1.5f);
+        cat.batch.draw(startTexture, (960-200*1.5f)/2, 200f, 200*1.5f, 100*1.5f);
 
-        //game.font.draw(game.batch, "Welcome to Drop!!! ", 100, 150);
-        //game.font.draw(game.batch, "Tap anywhere to begin!", 100, 100);
         cat.batch.end();
 
         if (Gdx.input.isTouched()) {
             cat.setScreen(new GameScreen(cat));
-            //cat.setScreen(new WinnerScreen(cat, 1));
             dispose();
         }
     }

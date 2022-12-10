@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import objects.*;
+import org.w3c.dom.css.Rect;
 
 
 public class GameScreen implements Screen {
@@ -27,13 +28,17 @@ public class GameScreen implements Screen {
 
     Music bgm;
 
-    Texture tile, wall, window, glowingtile, player1title, player2title;
-    Texture couch, chair_left, chair_right, largeDrawer, smallDrawer, sidetable, lamp, table, tableplant;
-    Texture fireball_left, fireball_right, fireball_up, fireball_down;
+    Texture tile, wall, window, glowingtile, player1title, player2title, matt;
+    Texture couch, chair_left, chair_right, chair_up, chair_down, couchHL, couchHR,
+            bookshelfS, bookshelfL, largeDrawer, smallDrawer, sidetable,
+            lamp, table, tableplant;
     float stateTime;
     Sound powerup;
+    Sound p1meow;
+    Sound p2meow;
     Sound glassShattering;
-    Music rainMusic;
+    Sound hit;
+
     OrthographicCamera camera1;
     OrthographicCamera camera2;
     OrthographicCamera camera3;
@@ -55,6 +60,11 @@ public class GameScreen implements Screen {
     ArrayList<Heart> p1Lives;
     ArrayList<Heart> p2Lives;
 
+    ArrayList<Player> player1queue;
+    ArrayList<Player> player2queue;
+
+    ArrayList<Fireball> fireballs;
+
     float timePassed;
 
 
@@ -71,8 +81,12 @@ public class GameScreen implements Screen {
 
         // load the drop sound effect and the rain background "music"
         powerup = Gdx.audio.newSound(Gdx.files.internal("Audio/item.mp3"));
-        bgm = Gdx.audio.newMusic(Gdx.files.internal("Audio/background.mp3"));
+        bgm = Gdx.audio.newMusic(Gdx.files.internal("Audio/bgm.mp3"));
         glassShattering = Gdx.audio.newSound(Gdx.files.internal("Audio/break.mp3"));
+        p1meow = Gdx.audio.newSound(Gdx.files.internal("Audio/p1meow.mp3"));
+        p2meow = Gdx.audio.newSound(Gdx.files.internal("Audio/p2meow.mp3"));
+        hit = Gdx.audio.newSound(Gdx.files.internal("Audio/crash.mp3"));
+
         bgm.setLooping(true);
 
         // create the camera and the SpriteBatch
@@ -94,12 +108,17 @@ public class GameScreen implements Screen {
         p2_fireball = new Array<>();
         p1Lives = new ArrayList<>();
         p2Lives = new ArrayList<>();
+        player1queue = new ArrayList<>();
+        player2queue = new ArrayList<>();
+        fireballs = new ArrayList<>();
 
+        player1queue.add(cat1);
+        player2queue.add(cat2);
         for (int i = 0; i < 3; i++) {
             Heart h1 = new Heart();
             Heart h2 = new Heart();
             h1.setLocation(120 + i * 55, 8);
-            h2.setLocation(800 + i * 55, 8);
+            h2.setLocation(910 - i * 55, 8);
             p1Lives.add(h1);
             p2Lives.add(h2);
         }
@@ -109,24 +128,45 @@ public class GameScreen implements Screen {
     }
 
     public void putBreakables() {
-        Breakable f1 = new Breakable(true, 640, 70);
-        Breakable f2 = new Breakable(true, 240, 140);
-        Breakable f3 = new Breakable(true, 560, 490);
-        Breakable p1 = new Breakable(false, 95, 210);
-        Breakable p2 = new Breakable(false, 240, 500);
-        Breakable p3 = new Breakable(false, 720, 490);
+        Breakable f1 = new Breakable(true, 960, 770);
+        Breakable f2 = new Breakable(true, 960, 840);
+        Breakable f3 = new Breakable(true, 800, 420);
+        Breakable f4 = new Breakable(true, 640, 350);
+        Breakable f5 = new Breakable(true, 240, 420);
+        Breakable p1 = new Breakable(false, 160, 0);
+        Breakable p2 = new Breakable(false, 160, 70);
+        Breakable p3 = new Breakable(false, 480, 840);
+        Breakable p4 = new Breakable(false, 720, 70);
+        Breakable p5 = new Breakable(false, 1120, 210);
+
         breakable.add(f1);
         breakable.add(f2);
         breakable.add(f3);
+        breakable.add(f4);
+        breakable.add(f5);
         breakable.add(p1);
         breakable.add(p2);
         breakable.add(p3);
+        breakable.add(p4);
+        breakable.add(p5);
     }
 
     public void putPowerups() {
-        Catnip cp = new Catnip(600,350);
+        Catnip cp = new Catnip(640,840);
+        Catnip cp2 = new Catnip(250, 50);
         powerups.add(cp);
-        System.out.println("initializikng");
+        powerups.add(cp2);
+
+        WetFood wf = new WetFood(480, 140);
+        WetFood wf2 = new WetFood(880, 560);
+        powerups.add(wf);
+        powerups.add(wf2);
+
+        DryFood df = new DryFood(400, 630);
+        DryFood df2 = new DryFood(880, 100);
+        powerups.add(df);
+        powerups.add(df2);
+
 
     }
 
@@ -178,21 +218,24 @@ public class GameScreen implements Screen {
         wall = new Texture(Gdx.files.internal("Texture/furniture/floor/wall.png"));
         glowingtile = new Texture(Gdx.files.internal("Texture/furniture/floor/windowshade.png"));
         tile = new Texture(Gdx.files.internal("Texture/furniture/floor/b_title.png"));
+        matt = new Texture(Gdx.files.internal("Texture/furniture/floor/smallmatt.png"));
+
         window = new Texture(Gdx.files.internal("Texture/furniture/floor/window.png"));
         couch = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/Couch.png"));
         chair_left = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/chair_left.png"));
         chair_right = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/chair_right.png"));
+        chair_up = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/chair_center.png"));
+        chair_down = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/chair_centerD.png"));
         largeDrawer = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/largeDrawer.png"));
         smallDrawer = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/drawer.png"));
         lamp = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/lamp.png"));
         sidetable = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/sidetable.png"));
         table = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/table.png"));
         tableplant = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/plant2.png"));
-        fireball_left = new Texture(Gdx.files.internal("Texture/attack/attack_L.png"));
-        fireball_right = new Texture(Gdx.files.internal("Texture/attack/attack_R.png"));
-        fireball_up = new Texture(Gdx.files.internal("Texture/attack/attack_U.png"));
-        fireball_down = new Texture(Gdx.files.internal("Texture/attack/attack_D.png"));
-
+        couchHL = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/couchHL.png"));
+        couchHR = new Texture(Gdx.files.internal("Texture/furniture/unbreakable/couchHR.png"));
+        bookshelfS =  new Texture(Gdx.files.internal("Texture/furniture/unbreakable/bookshelf.png"));
+        bookshelfL =  new Texture(Gdx.files.internal("Texture/furniture/unbreakable/largeBookshelf.png"));
         player1title = new Texture("Texture/buttons/p1.png");
         player2title = new Texture("Texture/buttons/p2.png");
     }
@@ -201,12 +244,10 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(0, 0, 0, 0);
         cameraSetup();
 
-
         playerCrash();
+        fireballCrash();
         setBoundaries(cat1);
         setBoundaries(cat2);
-
-
 
         cat1.update(stateTime);
         cat2.update(stateTime);
@@ -215,30 +256,25 @@ public class GameScreen implements Screen {
         Gdx.gl.glViewport( 0,140,960,980);
         cat.batch.begin();
 
-
         drawBackground();
+        cat.batch.draw(matt, 0,490,80,70);
+        cat.batch.draw(matt, 1200,490,80,70);
         stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
         // cat.font.draw(cat.batch, "Drops Collected: " + dropsGathered, 0, 480);
         unbreakable.clear();
         putFurnitures();
         cat.batch.draw(cat1.getCurrentFrame(), player1.x, player1.y, player1.getWidth(), player1.getHeight());
         cat.batch.draw(cat2.getCurrentFrame(), player2.x, player2.y, player2.getWidth(), player2.getHeight());
-
+        shoot();
 
         for (Breakable b: breakable) {
             Animation anime = b.getAnime();
-
-            if(player1.overlaps(b.getFurniture()) || player2.overlaps(b.getFurniture())){
-                b.broken();
-
-            }
             if (!b.isBroken()) {
                 TextureRegion currentFrame = (TextureRegion) anime.getKeyFrame(0, true);
                 cat.batch.draw(currentFrame, b.getX(), b.getY(), b.getWidth(), b.getHeight());
             } else {
                 TextureRegion currentFrame = (TextureRegion) anime.getKeyFrame(10, true);
                 cat.batch.draw(currentFrame, b.getX(), b.getY(), b.getWidth(), b.getHeight());
-
             }
         }
 
@@ -264,66 +300,69 @@ public class GameScreen implements Screen {
 
 
         drawBackground();
+        cat.batch.draw(matt, 0,490,80,70);
+        cat.batch.draw(matt, 1200,490,80,70);
         stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
         // cat.font.draw(cat.batch, "Drops Collected: " + dropsGathered, 0, 480);
         unbreakable.clear();
         putFurnitures();
         cat.batch.draw(cat1.getCurrentFrame(), player1.x, player1.y, player1.getWidth(), player1.getHeight());
         cat.batch.draw(cat2.getCurrentFrame(), player2.x, player2.y, player2.getWidth(), player2.getHeight());
+        shoot();
+
         for (PowerUpItem pui: powerups) {
             if (player1.overlaps(pui.getRec())) {
                 pui.taken();
                 pui.effect(cat1);
                 powerup.play();
+                if(pui instanceof WetFood) {
+                    Heart h = new Heart();
+                    h.setLocation(120 + p1Lives.size() * 55, 8);
+                    p1Lives.add(h);
+                }
             }
             if (player2.overlaps(pui.getRec())) {
                 pui.taken();
                 pui.effect(cat2);
                 powerup.play();
+                if(pui instanceof WetFood) {
+                    Heart h = new Heart();
+                    h.setLocation(910 - p2Lives.size() * 55,8);
+                    p2Lives.add(h);
+                }
             }
             if (!pui.isTaken()) {
                 cat.batch.draw(pui.getTexture(), pui.getX(), pui.getY(), pui.getWidth(), pui.getHeight());
-            }}
+            }
+        }
 
         for (Breakable b: breakable) {
             Animation anime = b.getAnime();
-
-
-            if(player1.overlaps(b.getFurniture()) || player2.overlaps(b.getFurniture())){
-                b.broken();
-
-            }
             if (!b.isBroken()) {
                 TextureRegion currentFrame = (TextureRegion) anime.getKeyFrame(0, true);
                 cat.batch.draw(currentFrame, b.getX(), b.getY(), b.getWidth(), b.getHeight());
             } else {
                 TextureRegion currentFrame = (TextureRegion) anime.getKeyFrame(10, true);
                 cat.batch.draw(currentFrame, b.getX(), b.getY(), b.getWidth(), b.getHeight());
-
             }
         }
 
         cat.batch.end();
 
-
         cat.batch.setProjectionMatrix(camera3.combined);
         Gdx.gl.glViewport( 0,0,1920,392);
         cat.batch.begin();
 
-
         for (int i = 0; i < 12; i++) {
             cat.batch.draw(wall,i*80, 0, 80, 70);
         }
-
         cat.batch.draw(player1title, 0,28, 0.18f*678, 0.18f*209);
-        cat.batch.draw(player2title, 700,28, 0.18f*678, 0.18f*209);
+        cat.batch.draw(player2title, 650,28, 0.18f*678, 0.18f*209);
 
         for (int i = 0; i < p1Lives.size(); i++) {
             Heart h = p1Lives.get(i);
             cat.batch.draw(h.getImg(), h.getX(), h.getY(), h.getWidth(), h.getHeight());
-
         }
-
         for (int i = 0; i < p2Lives.size(); i++) {
             Heart h = p2Lives.get(i);
             cat.batch.draw(h.getImg(), h.getX(), h.getY(), h.getWidth(), h.getHeight());
@@ -333,23 +372,31 @@ public class GameScreen implements Screen {
         Rectangle b1 = minimap.getR1();
         Rectangle b2 = minimap.getR2();
 
-
         b1.set(player1.getX()/10, player1.getY()/10, 65/10, 65/10);
         b2.set(player2.getX()/10, player2.getY()/10, 65/10, 65/10);
         cat.batch.draw(minimap.getP1(), b1.x + 416, b1.y, 65/10, 65/10);
         cat.batch.draw(minimap.getP2(), b2.x + 416, b2.y, 65/10, 65/10);
 
-
         cat.batch.end();
 
-
-
-        for(Rectangle x : unbreakable){
-            //touched(player1, x);
-            //touched(player2, x);
-        }
-        if(player1.overlaps(player2) && p1Lives.size() > 0 ){
+        if (tryBurnFireball(cat1) && !cat1.isInvinsible() && p1Lives.size() > 0 ){
+            player1queue.clear();
             p1Lives.remove(p1Lives.size()-1);
+            p1meow.play();
+            cat1 = new Player(1, stateTime);
+            player1 = cat1.getRec();
+            System.out.println("new lives...");
+            player1queue.add(cat1);
+        }
+
+        if (tryBurnFireball(cat2) && !cat2.isInvinsible() && p2Lives.size() > 0 ){
+            player2queue.clear();
+            p2Lives.remove(p2Lives.size()-1);
+            p2meow.play();
+            cat2 = new Player(2, stateTime);
+            player2 = cat2.getRec();
+            System.out.println("new lives for cat2...");
+            player1queue.add(cat2);
         }
 
         int index = -1;
@@ -376,14 +423,12 @@ public class GameScreen implements Screen {
             }
         }
 
-
         if(cat2.getSpecialEffect() != 0 ) {
             cat2.setSpecialEffect(cat2.getSpecialEffect() + Gdx.graphics.getDeltaTime());
             if (cat2.getSpecialEffect() > 5) {
                 cat2.resetEffect();
                 System.out.println("done!");
             }
-
         }
         //System.out.println(powerups.size());
 
@@ -391,7 +436,7 @@ public class GameScreen implements Screen {
             glassShattering.play();
             breakable.remove(index);
         }
-        if(index2 != -1) {
+        if (index2 != -1) {
             powerups.remove(index2);
             System.out.println("removing....");
         }
@@ -399,73 +444,61 @@ public class GameScreen implements Screen {
         if (p1Lives.size() == 0) {
             cat.setScreen(new WinnerScreen(cat, 2));
             dispose();
-
         }
-
         if (p2Lives.size() == 0) {
            cat.setScreen(new WinnerScreen(cat, 1));
            dispose();
         }
-
-/*
-
-        if (Gdx.input.isKeyPressed(Keys.LEFT))
-            bucket.x -= 200 * Gdx.graphics.getDeltaTime();
-        if (Gdx.input.isKeyPressed(Keys.RIGHT))
-            bucket.x += 200 * Gdx.graphics.getDeltaTime();
-
-        // make sure the bucket stays within the screen bounds
-        if (bucket.x < 0)
-            bucket.x = 0;
-        if (bucket.x > 800 - 64)
-            bucket.x = 800 - 64;
-
-        // check if we need to create a new raindrop
-        if (TimeUtils.nanoTime() - lastDropTime > 1000000000)
-            spawnRaindrop();
-
-        // move the raindrops, remove any that are beneath the bottom edge of
-        // the screen or that hit the bucket. In the later case we increase the
-        // value our drops counter and add a sound effect.
-        Iterator<Rectangle> iter = raindrops.iterator();
-        while (iter.hasNext()) {
-            Rectangle raindrop = iter.next();
-            raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
-            if (raindrop.y + 64 < 0)
-                iter.remove();
-            if (raindrop.overlaps(bucket)) {
-                dropsGathered++;
-                dropSound.play();
-                iter.remove();
-            }
-        }*/
     }
 
     public void makeFurniture(Texture texture, int x, int y, int w, int h){
         Rectangle furniture = new Rectangle( x, y, w * width, h * height);
-        //cat.batch.setBlendFunction(GL20.GL_ONE, GL20.GL_ZERO);
         cat.batch.draw(texture, furniture.x, furniture.y, furniture.width, furniture.height);
         unbreakable.add(furniture);
     }
 
-    public void putFurnitures(){
-        //breakable
-        makeFurniture(couch, 320, 420, 2, 1);
-        makeFurniture(chair_left, 160, 210, 1, 1);
-        makeFurniture(chair_right, 560, 210, 1,1);
-        makeFurniture(largeDrawer, 0, 490, 1, 2);
-        makeFurniture(smallDrawer, 80, 490, 1,1 );
-        makeFurniture(lamp, 480, 420, 1,1);
-        makeFurniture(sidetable, 560, 140, 1, 1);
-        makeFurniture(table, 320, 210, 2, 1);
-        makeFurniture(tableplant, 160, 280, 1, 1);
+    public void shoot() {
+        if (Gdx.input.isKeyPressed(Input.Keys.F) && cat1.tryFire()) {
+            fireballs.add(new Fireball(cat1));
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.SPACE) && cat2.tryFire()){
+           fireballs.add(new Fireball(cat2));
+        }
+        for (Fireball fb : fireballs) {
+            Rectangle fbrec = fb.getRec();
+            fb.update();
+            fb.draw(cat.batch);
+        }
+    }
 
+    public void putFurnitures() {
+        //breakable
+        makeFurniture(couch, 320, 700, 2, 1);
+        makeFurniture(chair_left, 160, 490, 1, 1);
+        makeFurniture(chair_right, 560, 490, 1,1);
+        makeFurniture(largeDrawer, 240, 840, 1, 2);
+        makeFurniture(smallDrawer, 320, 840, 1,1 );
+        makeFurniture(largeDrawer, 1200, 840, 1, 2);
+        makeFurniture(smallDrawer, 1120, 840, 1,1 );
+        makeFurniture(lamp, 480, 700, 1,1);
+        makeFurniture(sidetable, 560, 420, 1, 1);
+        makeFurniture(table, 320, 490, 2, 1);
+        makeFurniture(tableplant, 160, 560, 1, 1);
+        makeFurniture(bookshelfS, 80, 840, 1, 1);
+        makeFurniture(bookshelfL, 160, 840, 1,2 );
+        makeFurniture(chair_up, 960, 490, 1,1);
+        makeFurniture(chair_up, 880, 490, 1,1);
+        makeFurniture(couchHL, 720, 280, 1, 2);
+        makeFurniture(couchHR, 1120, 280, 1, 2);
+        makeFurniture(table, 880, 315, 2, 1);
+        makeFurniture(tableplant, 800, 840, 1,1 );
+        makeFurniture(lamp, 240, 280, 1, 1);
+        makeFurniture(couch, 320, 210, 2,1);
 
     }
 
     public void setBoundaries(Player cat){
         Rectangle player = cat.getRec();
-
 
         if ( player.x < 0 ) {
             player.x = 0;
@@ -489,12 +522,11 @@ public class GameScreen implements Screen {
         Rectangle intersection = new Rectangle();
         //furnitures
 
-
-
-        for(Rectangle furniture: unbreakable){
+        for(Rectangle furniture: unbreakable) {
             Intersector.intersectRectangles(player, furniture, intersection);
 
-            if(player.overlaps(furniture)){
+            // TODO: Unify with collisionAvoidance()
+            if (player.overlaps(furniture)){
                 float playerCenterX = (player.x + player.width * 0.5f);
                 float playerCenterY = (player.y + player.height * 0.5f);
                 float interCenterX = (intersection.x + intersection.width * 0.5f);
@@ -510,11 +542,13 @@ public class GameScreen implements Screen {
             }
         }
 
-        for(Breakable b: breakable){
+        for (Breakable b: breakable) {
+            if (b.isBroken()) { continue; }
             Rectangle furniture = b.getFurniture();
             Intersector.intersectRectangles(player, furniture, intersection);
 
-            if(player.overlaps(furniture)){
+            // TODO: Unify with collisionAvoidance()
+            if (player.overlaps(furniture)) {
                 float playerCenterX = (player.x + player.width * 0.5f);
                 float playerCenterY = (player.y + player.height * 0.5f);
                 float interCenterX = (intersection.x + intersection.width * 0.5f);
@@ -534,100 +568,72 @@ public class GameScreen implements Screen {
     public void playerCrash() {
         collisionAvoidance(player2, player1);
         collisionAvoidance(player1, player2);
-
-
     }
 
-    public void collisionAvoidance(Rectangle one, Rectangle two){
-        if(one.overlaps(two)){
+    public void fireballCrash() {
+        for (Breakable b: breakable) {
+            if (b.isBroken()) { continue; }
+            if (tryBurnFireball(b.getFurniture())) {
+                b.broken();
+            }
+        }
+        for (Rectangle r: unbreakable) {
+            tryBurnFireball(r);
+        }
+        for (Fireball f : fireballs) {
+            if (!f.onScreen()) {
+                fireballs.remove(f);
+                break;
+            }
+        }
+    }
+
+    public boolean tryBurnFireball(Player player) {
+        for (Fireball f : fireballs) {
+            if (f.owner == player) { continue; }
+            if (player.getRec().overlaps(f.getRec())) {
+                fireballs.remove(f);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean tryBurnFireball(Rectangle region) {
+        for (Fireball f : fireballs) {
+            if (region.overlaps(f.getRec())) {
+                if(unbreakable.contains(region)){
+                    hit.play();
+                }
+                fireballs.remove(f);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void collisionAvoidance(Rectangle one, Rectangle two){
+        if(one.overlaps(two)) {
             Rectangle intersection = new Rectangle();
             Intersector.intersectRectangles(one, two, intersection);
 
-            if(one.overlaps(two)){
-                float playerCenterX = (one.x + one.width * 0.5f);
-                float playerCenterY = (one.y + one.height * 0.5f);
-                float interCenterX = (intersection.x + intersection.width * 0.5f);
-                float interCenterY = (intersection.y + intersection.height * 0.5f);
-                float intersectVecX = playerCenterX - interCenterX;
-                float intersectVecY = playerCenterY - interCenterY;
-                if (Math.abs(intersectVecX) > Math.abs(intersectVecY)) {
-                    one.x += ((intersectVecX > 0) ? 1 : -1) * intersection.width/10;
-                    two.x -= ((intersectVecX > 0) ? 1 : -1) ;
-                } else {
-                    one.y += ((intersectVecY > 0) ? 1 : -1) * intersection.height/10;
-                    two.y -= ((intersectVecY > 0) ? 1 : -1) ;
-                }
+            float playerCenterX = (one.x + one.width * 0.5f);
+            float playerCenterY = (one.y + one.height * 0.5f);
+            float interCenterX = (intersection.x + intersection.width * 0.5f);
+            float interCenterY = (intersection.y + intersection.height * 0.5f);
+            float intersectVecX = playerCenterX - interCenterX;
+            float intersectVecY = playerCenterY - interCenterY;
+            if (Math.abs(intersectVecX) > Math.abs(intersectVecY)) {
+                one.x += ((intersectVecX > 0) ? 1 : -1) * intersection.width/10;
+                two.x -= ((intersectVecX > 0) ? 1 : -1) ;
+            } else {
+                one.y += ((intersectVecY > 0) ? 1 : -1) * intersection.height/10;
+                two.y -= ((intersectVecY > 0) ? 1 : -1) ;
             }
         }
     }
 
-/*    public void attack(Player player){
-        if(Gdx.input.isKeyPressed(player.shoot)){
-            System.out.println("Pressed");
-            Rectangle p = player.getRectngle();
-            Array<Rectangle> fireballs = (player.playerNum == 1 ? p1_fireball : p2_fireball);
-            Iterator<Rectangle> itr = fireballs.iterator();
-            float ballx = p.x * 1.5f;
-            float bally = p.y * 1.5f;
 
-            if ( player.isUp() ) {
-                //fireballs.add(new Rectangle(p.x * 1.5f - 7.5f, p.y * 1.5f - 15, 15, 30));
-                fireballs.add(new Rectangle(ballx, bally, 15, 30));
-                Rectangle fireball = fireballs.get(0);
-                fireball.y += 300 * Gdx.graphics.getDeltaTime();
-                cat.batch.draw(fireball_up, fireball.x, fireball.y, fireball.width, fireball.height);
-
-                for( Rectangle furniture: unbreakable){
-                    if(fireball.overlaps(furniture)){
-                        itr.remove();
-                    }
-                }
-            }
-            if ( player.isDown() ) {
-
-                fireballs.add(new Rectangle(ballx, bally, 15, 30));
-                Rectangle fireball = fireballs.get(0);
-
-                fireball.y -= 300 * Gdx.graphics.getDeltaTime();
-                cat.batch.draw(fireball_down, fireball.x, fireball.y, fireball.width, fireball.height);
-
-                for( Rectangle furniture: unbreakable){
-                    if(fireball.overlaps(furniture)){
-                        itr.remove();
-                    }
-                }
-
-            }
-            if ( player.isLeft() ) {
-                fireballs.add(new Rectangle(ballx, bally, 30, 15));
-                Rectangle fireball = fireballs.get(0);
-
-                fireball.x -= 300 * Gdx.graphics.getDeltaTime();
-                cat.batch.draw(fireball_left, fireball.x, fireball.y, fireball.width, fireball.height);
-
-                for( Rectangle furniture: unbreakable){
-                    if(fireball.overlaps(furniture)){
-                        itr.remove();
-                    }
-                }
-
-            }
-            if ( player.isRight() ) {
-                fireballs.add(new Rectangle(ballx, bally, 30, 15));
-                Rectangle fireball = fireballs.get(0);
-                fireball.x += 300 * Gdx.graphics.getDeltaTime();
-                cat.batch.draw(fireball_up, fireball.x, fireball.y, fireball.width, fireball.height);
-
-                for( Rectangle furniture: unbreakable){
-                    if(fireball.overlaps(furniture)){
-                        itr.remove();
-                    }
-                }
-
-            }
-
-        }
-    }*/
 
 
     @Override
