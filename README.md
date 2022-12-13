@@ -6,13 +6,12 @@
 |  Student Name       | Marie Shimizu      |
 |  Student Email      | mshimizu4@sfsu.edu |
 
-## src Folder Purpose 
-src folder is to be used to store source code only.
+## core Folder Purpose 
+core folder contains all the source code for the cat fight.
 
-## resources Folder Purpose 
-resources folder is to be used to store the resources for your project only. This includes images, sounds, map text files, etc.
-
-`The src and resources folders can be deleted if you want a different file structure`
+## assets Folder Purpose 
+assets folder contains all the resources (texture, audio, music etc) 
+`Original src and resources folders were deleted due to different structure used`
 
 ## jar Folder Purpose 
 The jar folder is to be used to store the built jar of your term-project.
@@ -24,14 +23,25 @@ The jar folder is to be used to store the built jar of your term-project.
 # Required Information when Submitting Tank Game
 
 ## Version of Java Used:
+Java 15+
 
 ## IDE used: 
+IntelliJ
 
 ## Steps to Import project into IDE:
+Clone the code from github
 
 ## Steps to Build your Project:
- 
+1.	In your IDE, extend the Gradle tab on the right sight of your window.
+2.	Expand the tasks of your project and then select: desktop -> other -> run
+
 ## Steps to run your Project:
+1. The jar file which contains the game is in jar directory. 
+2. In your terminal, cd to jar module. 
+3. The jar file name is “CatFight.jar”. 
+4. Run command:
+`java -XstartOnFirstThread -jar CatFight.jar`
+
 
 ## Controls to play your Game:
 
