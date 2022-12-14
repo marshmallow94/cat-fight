@@ -7,7 +7,7 @@ import org.w3c.dom.Text;
 
 public class Heart extends GameObject {
 
-    Texture heartimg;
+    private Texture heartimg;
 
 
     public Heart() {

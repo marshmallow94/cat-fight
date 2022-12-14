@@ -19,53 +19,53 @@ import org.w3c.dom.css.Rect;
 
 
 public class GameScreen implements Screen {
-    final Cat cat;
-    int screenWidth = 1280;
-    int screenHeight = 980;
+    private final Cat cat;
+    private int screenWidth = 1280;
+    private int screenHeight = 980;
 
-    int height = 70;
-    int width = 80;
+    private int height = 70;
+    private int width = 80;
 
-    Music bgm;
+    private Music bgm;
 
-    Texture tile, wall, window, glowingtile, player1title, player2title, matt;
-    Texture couch, chair_left, chair_right, chair_up, chair_down, couchHL, couchHR,
+    private Texture tile, wall, window, glowingtile, player1title, player2title, matt;
+    private Texture couch, chair_left, chair_right, chair_up, chair_down, couchHL, couchHR,
             bookshelfS, bookshelfL, largeDrawer, smallDrawer, sidetable,
             lamp, table, tableplant;
-    float stateTime;
-    Sound powerup;
-    Sound p1meow;
-    Sound p2meow;
-    Sound glassShattering;
-    Sound hit;
+    private float stateTime;
+    private Sound powerup;
+    private Sound p1meow;
+    private Sound p2meow;
+    private Sound glassShattering;
+    private Sound hit;
 
-    OrthographicCamera camera1;
-    OrthographicCamera camera2;
-    OrthographicCamera camera3;
-    Rectangle player1;
-    Rectangle player2;
+    private OrthographicCamera camera1;
+    private OrthographicCamera camera2;
+    private OrthographicCamera camera3;
+    private Rectangle player1;
+    private Rectangle player2;
 
-    Player cat1;
-    Player cat2;
+    private Player cat1;
+    private Player cat2;
 
-    MiniMap minimap;
+    private MiniMap minimap;
 
-    ArrayList<Rectangle> unbreakable;
-    ArrayList<Breakable> breakable;
-    ArrayList<PowerUpItem> powerups;
+    private ArrayList<Rectangle> unbreakable;
+    private ArrayList<Breakable> breakable;
+    private ArrayList<PowerUpItem> powerups;
 
-    Array<Rectangle> p1_fireball;
-    Array<Rectangle> p2_fireball;
+    private Array<Rectangle> p1_fireball;
+    private Array<Rectangle> p2_fireball;
 
-    ArrayList<Heart> p1Lives;
-    ArrayList<Heart> p2Lives;
+    private ArrayList<Heart> p1Lives;
+    private ArrayList<Heart> p2Lives;
 
-    ArrayList<Player> player1queue;
-    ArrayList<Player> player2queue;
+    private ArrayList<Player> player1queue;
+    private ArrayList<Player> player2queue;
 
-    ArrayList<Fireball> fireballs;
+    private ArrayList<Fireball> fireballs;
 
-    float timePassed;
+    private float timePassed;
 
 
     public GameScreen(final Cat cat) {
@@ -524,30 +524,13 @@ public class GameScreen implements Screen {
 
         for(Rectangle furniture: unbreakable) {
             Intersector.intersectRectangles(player, furniture, intersection);
-
-            // TODO: Unify with collisionAvoidance()
-            if (player.overlaps(furniture)){
-                float playerCenterX = (player.x + player.width * 0.5f);
-                float playerCenterY = (player.y + player.height * 0.5f);
-                float interCenterX = (intersection.x + intersection.width * 0.5f);
-                float interCenterY = (intersection.y + intersection.height * 0.5f);
-                float intersectVecX = playerCenterX - interCenterX;
-                float intersectVecY = playerCenterY - interCenterY;
-                if (Math.abs(intersectVecX) > Math.abs(intersectVecY)) {
-                    player.x += ((intersectVecX > 0) ? 1 : -1) * intersection.width;
-                } else {
-                    player.y += ((intersectVecY > 0) ? 1 : -1) * intersection.height;
-                }
-                break;
-            }
+            collisionAvoidance(player, furniture, 1);
         }
 
         for (Breakable b: breakable) {
             if (b.isBroken()) { continue; }
             Rectangle furniture = b.getFurniture();
             Intersector.intersectRectangles(player, furniture, intersection);
-
-            // TODO: Unify with collisionAvoidance()
             if (player.overlaps(furniture)) {
                 float playerCenterX = (player.x + player.width * 0.5f);
                 float playerCenterY = (player.y + player.height * 0.5f);
@@ -566,8 +549,8 @@ public class GameScreen implements Screen {
     }
 
     public void playerCrash() {
-        collisionAvoidance(player2, player1);
-        collisionAvoidance(player1, player2);
+        collisionAvoidance(player2, player1, 10);
+        collisionAvoidance(player1, player2, 10);
     }
 
     public void fireballCrash() {
@@ -612,7 +595,7 @@ public class GameScreen implements Screen {
         return false;
     }
 
-    public static void collisionAvoidance(Rectangle one, Rectangle two){
+    public static void collisionAvoidance(Rectangle one, Rectangle two, int ratio){
         if(one.overlaps(two)) {
             Rectangle intersection = new Rectangle();
             Intersector.intersectRectangles(one, two, intersection);
@@ -624,10 +607,10 @@ public class GameScreen implements Screen {
             float intersectVecX = playerCenterX - interCenterX;
             float intersectVecY = playerCenterY - interCenterY;
             if (Math.abs(intersectVecX) > Math.abs(intersectVecY)) {
-                one.x += ((intersectVecX > 0) ? 1 : -1) * intersection.width/10;
+                one.x += ((intersectVecX > 0) ? 1 : -1) * intersection.width/ratio;
                 two.x -= ((intersectVecX > 0) ? 1 : -1) ;
             } else {
-                one.y += ((intersectVecY > 0) ? 1 : -1) * intersection.height/10;
+                one.y += ((intersectVecY > 0) ? 1 : -1) * intersection.height/ratio;
                 two.y -= ((intersectVecY > 0) ? 1 : -1) ;
             }
         }

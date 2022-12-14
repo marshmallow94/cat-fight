@@ -29,24 +29,24 @@ public class Player extends GameObject {
 
     private int acceleration;
 
-    int keyup, keydown, keyleft, keyright, keyshoot;
-    Texture[] imgs;
+    private int keyup, keydown, keyleft, keyright, keyshoot;
+    private Texture[] imgs;
 
-    TextureRegion currentFrame;
-    TextureRegion idleleft, idleright, goleft, goright, goup, godown, shootright, shootleft, sleep;
-    float lastTouched;
+    private TextureRegion currentFrame;
+    private TextureRegion idleleft, idleright, goleft, goright, goup, godown, shootright, shootleft, sleep;
+    private float lastTouched;
 
-    float stateTime;
+    private float stateTime;
 
-    float specialEffect = 0;
+    private float specialEffect = 0;
 
     private int playerNum;
 
     private int numLives;
     private boolean invinsible;
 
-    Rectangle rec;
-    float fireballCharge = 0.0f;
+    private Rectangle rec;
+    private float fireballCharge = 0.0f;
 
     public Player(int playerNum, float stateTime) {
         this.playerNum = playerNum;

@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 
 public abstract class PowerUpItem extends GameObject {
-    Texture texture;
-    float timePassed;
-    boolean isTaken;
-    Rectangle rec;
+    protected Texture texture;
+    protected float timePassed;
+    protected boolean isTaken;
+    protected Rectangle rec;
 
     public PowerUpItem(int x, int y){
         this.x = x;

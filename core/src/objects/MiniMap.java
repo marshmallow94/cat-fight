@@ -15,12 +15,12 @@ public class MiniMap extends GameObject {
     private float y1;
     private float x2;
     private float y2;
-    Texture map;
-    Texture p1;
-    Texture p2;
+    private Texture map;
+    private Texture p1;
+    private Texture p2;
 
-    Rectangle r1;
-    Rectangle r2;
+    private Rectangle r1;
+    private Rectangle r2;
 
     public MiniMap() {
         map = new Texture(Gdx.files.internal("Texture/map.png"));

@@ -37,8 +37,8 @@ public class Fireball extends GameObject {
     public Fireball(Player p) {
         this.owner = p;
         loadTexture(p);
-        this.x = p.rec.getX();
-        this.y = p.rec.getY();
+        this.x = p.getRec().getX();
+        this.y = p.getRec().getY();
         this.speed = 400;
         this.dx = 0.0f;
         this.dy = 0.0f;

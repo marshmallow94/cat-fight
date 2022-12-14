@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class MainMenuScreen implements Screen {
-    final Cat cat;
+    private final Cat cat;
     public static Texture backgroundTexture;
     public static Texture titleTexture;
     public static Texture startTexture;
@@ -20,21 +20,21 @@ public class MainMenuScreen implements Screen {
     private static final int FRAME_COLS = 2, FRAME_ROWS = 1;
 
     // Objects used
-    Animation<TextureRegion> catAnimation1;
-    Animation<TextureRegion> catAnimation2;
-    Animation<TextureRegion> catAnimation3;
-    Animation<TextureRegion> catAnimation4;
+    private Animation<TextureRegion> catAnimation1;
+    private Animation<TextureRegion> catAnimation2;
+    private Animation<TextureRegion> catAnimation3;
+    private Animation<TextureRegion> catAnimation4;
 
-    Texture catSheet1;
-    Texture catSheet2;
-    Texture catSheet3;
-    Texture catSheet4;
+    private Texture catSheet1;
+    private Texture catSheet2;
+    private Texture catSheet3;
+    private Texture catSheet4;
 
     // A variable for tracking elapsed time for the animation
-    float stateTime;
+    private float stateTime;
 
 
-    OrthographicCamera camera;
+    private OrthographicCamera camera;
 
     public MainMenuScreen(final Cat game) {
         this.cat = game;
