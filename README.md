@@ -1,10 +1,4 @@
-# csc413-Cat Fight
-
-
-| Student Information |                    |
-|:-------------------:|--------------------|
-|  Student Name       | Marie Shimizu      |
-|  Student Email      | mshimizu4@sfsu.edu |
+# Cat Fight
 
 ## core Folder Purpose 
 core folder contains all the source code for the cat fight.
