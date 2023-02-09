@@ -14,7 +14,7 @@ The jar folder is to be used to store the built jar of your term-project.
 
 `THIS FOLDER CAN NOT BE DELETED OR MOVED`
 
-# Required Information when Submitting Tank Game
+#Information
 
 ## Version of Java Used:
 Java 15+
