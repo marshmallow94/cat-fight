@@ -1,8 +1,10 @@
 # Cat Fight
+![alt text](https://github.com/marshmallow94/cat-fight/blob/main/assets/Img/Gamescreen.png?raw=true)
+![alt text](https://github.com/marshmallow94/cat-fight/blob/main/assets/Img/Welcomescreen.png?raw=true)
 
 ## core Folder Purpose 
 core folder contains all the source code for the cat fight.
-![alt text](https://github.com/marshmallow94/cat-fight/blob/main/assets/Img/Gamescreen.png?raw=true)
+
 
 ## assets Folder Purpose 
 assets folder contains all the resources (texture, audio, music etc) 
