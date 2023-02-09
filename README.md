@@ -1,5 +1,5 @@
 # Cat Fight
-![alt text](https://github.com/marshmallow94/cat-fight/blob/main/assets/Img/Gamescreen.png?raw=true)
+
 ![alt text](https://github.com/marshmallow94/cat-fight/blob/main/assets/Img/Welcomescreen.png?raw=true)
 
 ## core Folder Purpose 
